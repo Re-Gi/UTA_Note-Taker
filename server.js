@@ -26,8 +26,6 @@ app.get('/api/notes', (req, res) => {
     res.status(200).json(notes);
 });
 
-// `POST /api/notes` should receive a new note to save on the request body, add it to the `db.json` file, and then return the new note to the client. You'll need to find a way to give each note a unique id when it's saved.
-
 app.post('/api/notes', (req, res) => {
     console.log(`${req.method} note request recieved`);
 
@@ -48,10 +46,33 @@ app.post('/api/notes', (req, res) => {
     const notesStr = JSON.stringify(notes);
     
     fs.writeFileSync('./db/db.json', notesStr, (err) =>
-     err ? console.log(err) : console.log('Note added to database!')
+     err ? console.log(err) : console.log('Note added to database.')
     );
 
     res.status(201).json(response);
+});
+
+// `DELETE /api/notes/:id` should receive a query parameter that contains the id of a note to delete. To delete a note, you'll need to read all notes from the `db.json` file, remove the note with the given `id` property, and then rewrite the notes to the `db.json` file.
+
+app.delete('/api/notes/:id', (req, res) => {
+    console.log(`${req.method} note request recieved for ${req.params.id}`);
+
+    // let notesStr2 = JSON.stringify(notes)
+
+    for(let i = 0; i < notes.length; i++){
+        if(req.params.id === notes[i].id){
+            notes.splice([i], 1);
+
+            var notesStr2 = JSON.stringify(notes);
+            return notesStr2;
+        }
+    };
+
+    fs.writeFileSync('./db/db.json', notesStr2, (err) =>
+     err ? console.log(err) : console.log('Database updated.')
+    );
+
+    res.json(notes);
 });
 
 app.listen(PORT, () =>
