@@ -1,7 +1,8 @@
 const express = require('express');
-const nanoid = require('nanoid');
+const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const notes = require('./db/db.json');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3001;
@@ -11,8 +12,8 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('*', (req, res) =>
-    res.sendFile(path.join(__dirname, '/public/index.js'))
+app.get('/', (req, res) =>
+    res.sendFile(path.join(__dirname, '/public/index.html'))
 );
 
 app.get('/notes', (req, res) =>
@@ -21,6 +22,7 @@ app.get('/notes', (req, res) =>
 
 app.get('/api/notes', (req, res) => {
     console.log(`${req.method} request recieved`);
+
     res.status(200).json(notes);
 });
 
@@ -29,24 +31,27 @@ app.get('/api/notes', (req, res) => {
 app.post('/api/notes', (req, res) => {
     console.log(`${req.method} note request recieved`);
 
-    // const { title, text } = req.body;
+    const { title, text } = req.body;
 
-    // const newNote = {
-    //     title,
-    //     text,
-    //     note_id: nanoid()
-    // };
-    const newNote = req.body.push(`note_id: ${nanoid()}`);
+    const newNote = {
+        title,
+        text,
+        id: uuidv4()
+    };
 
     const response = {
         status: 'Success',
         body: newNote
     };
 
-    console.log(response);
+    notes.push(newNote);
+    const notesStr = JSON.stringify(notes);
+    
+    fs.writeFileSync('./db/db.json', notesStr, (err) =>
+     err ? console.log(err) : console.log('Note added to database!')
+    );
 
-    res.status(200).json(response);
-    console.log(res);
+    res.status(201).json(response);
 });
 
 app.listen(PORT, () =>
