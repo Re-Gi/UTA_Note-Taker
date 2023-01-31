@@ -1,1 +1,1 @@
-# UTA_Note-Taker
+# Note Taker
